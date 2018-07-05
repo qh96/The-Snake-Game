@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+		.field{top:0;left: 0;position: absolute;border: 2px solid #000;}
+		.snakebody{width: 20px;height: 20px;position: absolute;background-color: green;background:url('img/smile.jpg');}
+		.fruit{width: 20px;height:20px;position: absolute;background:url('img/sad.jpg');}
+		#down{width: 610px;height: 150px;position: absolute;background-color: #f0f0f0;left: 1px;top: 
+			405px;}
+		#right{width: 200px;height: 200px;position: absolute;left: 410px;top:0px;background-color: grey;}
+		#right p{font-size: 50px;text-align: center;}
+		#count{width: 200px;height: 204px;position: absolute;left: 410px;top:200px;background-color: grey;font-size: 100px;text-align: center;}
+	</style>
+</head>
+<body>
+	<div id="snake"></div>
+	<div id="field"></div>
+	<div id="down">
+	<p>游戏名称：鬼畜版"贪吃蛇"</p>
+	<p>操作说明：空格键（开始）＋方向键＋左上角ESC（暂停，按任意方向键再开始）</p>
+	<p>友情提示：考虑到玩家的牛逼程度，请注意速度变化</p>
+	<p>made by haoqin</p></div>
+	<div id="right"><p>count:</p></div>
+	<div id="count"></div>
+</body>
+</html>
+<script>
+	var over=false;//是否结束标志
+	var speed=400;//蛇速度，毫秒
+	var count=0;//果子计数
+	var direction;//蛇方向
+	var timer;//蛇移动interval计时器
+	function createDiv(type,css){//初始化场地和果子
+		switch(type){
+			case"field":
+				var elm=document.createElement("div");
+				elm.className=css;
+				document.getElementById("field").appendChild(elm);
+				return elm;
+			case"snake":
+				var elm=document.createElement("div");
+				elm.className=css;
+				document.getElementById("snake").appendChild(elm);
+				return elm;
+			default:break;
+		}
+		
+	}
+	//删除果子
+	function removeDiv(tag){
+		document.getElementById("field").removeChild(tag);
+	}//蛇类
+	function Snake(){
+		this.initSnake=function(){//初始化蛇身体
+			var div1=createDiv("snake","snakebody");
+			var div2=createDiv("snake","snakebody");
+			var div3=createDiv("snake","snakebody");
+			this.divs=[div3,div2,div1];//divs是蛇数组
+			this.divs[0].x=200;
+			this.divs[0].y=300;
+			this.divs[1].x=220;
+			this.divs[1].y=300;
+			this.divs[2].x=240;
+			this.divs[2].y=300;
+		}
+		this.show=function(){
+			for(var i in this.divs){
+				this.divs[i].style.left=(this.divs[i].x)+'px';
+				this.divs[i].style.top=(this.divs[i].y)+'px';
+			}
+		}
+		this.checkFruit=function(){//检测是否咬到了果子
+			if(this.divs[0].x==this.field.getPosLeft()&&this.divs[0].y==this.field.getPosTop())
+				{
+					this.field.removeFruit();
+					this.field.reset();
+				}
+				else
+				{
+					document.getElementById("snake").removeChild(document.getElementById("snake").firstChild);//删掉蛇尾
+					this.divs.length--;
+				}	
+		}
+		this.move=function(direc){//蛇移动
+			switch(direc){
+				case"left":
+					if(this.field.checkborder(this.divs[0].x-20,this.divs[0].y)=='Y'&&this.checkSelf()=='Y'){//边界检测以及自我碰撞检测
+						direction="left";
+						this.first=createDiv("snake","snakebody");
+						this.first.x=this.divs[0].x-20;//往左走
+						this.first.y=this.divs[0].y;
+						this.divs.unshift(this.first);//蛇的运动是每运动一个格，添加蛇头，删掉蛇尾
+						this.checkFruit();
+						this.show();
+						break;
+					}else{
+						over=true;
+						break;
+					}
+				case"right":
+					if(this.field.checkborder(this.divs[0].x+40,this.divs[0].y)=='Y'&&this.checkSelf()=='Y'){
+						direction="right";
+						this.first=createDiv("snake","snakebody");
+						this.first.x=this.divs[0].x+20;
+						this.first.y=this.divs[0].y;
+						this.divs.unshift(this.first);
+						this.checkFruit();
+						this.show();
+						break;
+					}else{
+						over=true;
+						break;
+					}
+				case"up":
+					if(this.field.checkborder(this.divs[0].x,this.divs[0].y-20)=='Y'&&this.checkSelf()=='Y'){
+						direction="up";
+						this.first=createDiv("snake","snakebody");
+						this.first.x=this.divs[0].x;
+						this.first.y=this.divs[0].y-20;
+						this.divs.unshift(this.first);
+						this.checkFruit();
+						this.show();
+						break;
+					}else{
+						over=true;
+						break;
+					}
+				case"down":
+					if(this.field.checkborder(this.divs[0].x,this.divs[0].y+40)=='Y'&&this.checkSelf()=='Y'){
+						direction="down";
+						this.first=createDiv("snake","snakebody");
+						this.first.x=this.divs[0].x;
+						this.first.y=this.divs[0].y+20;
+						this.divs.unshift(this.first);
+						this.checkFruit();
+						this.show();
+						break;
+					}else{
+						over=true;
+						break;
+					}
+			}
+		}
+		this.checkSelf=function(){//检测自我碰撞
+			for(var i=1;i<this.divs.length;i++){
+				if(this.divs[i].x==this.divs[0].x&&this.divs[i].y==this.divs[0].y){
+					over=true;
+					return 'N';
+				}
+				else{					
+				}
+			}
+			return 'Y';
+		}
+		this.getDivsLength=function(){
+			return this.divs.length;
+		}
+	}
+	function Field(w,h){//场地类
+		this.width=w?w:20;//以20px为单位
+		this.height=h?h:20;
+		
+		this.show=function(){//场地展示
+			var f=createDiv("field","field");
+			f.style.width=this.width*20+'px';
+			f.style.height=this.height*20+'px';
+		}
+		this.reset=function(left,top){//果子重设
+				this.fruit=createDiv("field","fruit");
+				var left=left?left:Math.floor(Math.random()*this.width)*20;//果子随机坐标
+				var top=top?top:Math.floor(Math.random()*this.height)*20;
+				this.fruit.style.left=left+'px';//果子show
+				this.fruit.style.top=top+'px';
+				this.getPosLeft=function(){
+					return left;
+				}
+				this.getPosTop=function(){
+					return top;
+				}
+				this.removeFruit=function(){
+					removeDiv(this.fruit);
+				}
+				count++;
+				switch(count-1){//检测果子数，在界面右侧显示
+					case 3:
+						document.getElementById("count").innerHTML="OK";
+						break;
+					case 6:
+						document.getElementById("count").innerHTML="good";
+						break;
+					case 9:
+						document.getElementById("count").innerHTML="666";
+						break;
+					case 12:
+						document.getElementById("count").innerHTML="NB!";
+						break;	
+					case 15:
+						document.getElementById("count").innerHTML="WTF!";
+						break;
+					default:
+						document.getElementById("count").innerHTML=count-1;
+						break;
+				}
+				if(count>3){//根据吃到果子数，改变速度
+					speed=200;
+				}
+				if(count>6){
+					speed=150;
+				}
+				if(count>9){
+					speed=100;
+				}
+				if(count>12){
+					speed=75;
+				}
+				if(count>15){
+					speed=50;
+				}
+
+		}
+		this.checkborder=function(x,y){//边界检测
+			if(x>=0&&x<=400&&y>=0&&y<=400)return 'Y';
+			else return 'N';
+		}
+
+	}
+	var s=new Snake();
+	s.initSnake();
+	var f = new Field();
+	s.field=f;
+	s.show();
+	f.show();
+	f.reset(100,300);//初始化果子位置
+	window.onkeydown=function(e){
+		if(over)return;
+		var e=window.event||e;
+		switch(e.keyCode){
+		case 32: //space
+			if(!direction){
+				timer=window.setInterval("if(!over)s.move('left');",speed);
+			}
+            break;
+        case 38: //up
+        	if(!(direction=="down")){
+        		clearInterval(timer);
+           		timer=window.setInterval("if(!over)s.move('up');",speed);
+        	}
+            break;
+        case 40: //down
+        	if(!(direction=="up")){
+        		clearInterval(timer);
+           		timer= window.setInterval("if(!over)s.move('down');",speed);
+        	}
+            break;
+        case 37: //left
+        	if(!(direction=="right")){
+        		clearInterval(timer);
+            	timer=window.setInterval("if(!over)s.move('left');",speed);
+        	}
+            break;
+        case 39: //right
+        	if(!(direction=="left")){
+        		clearInterval(timer);
+            	timer= window.setInterval("if(!over)s.move('right');",speed);
+        	}
+            break;
+        case 27: //esc
+            clearInterval(timer);
+            break;}
+
+	}
+
+</script>
