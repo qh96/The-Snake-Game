@@ -18,10 +18,10 @@
 	<div id="snake"></div>
 	<div id="field"></div>
 	<div id="down">
-	<p>游戏名称：鬼畜版"贪吃蛇"</p>
-	<p>操作说明：空格键（开始）＋方向键＋左上角ESC（暂停，按任意方向键再开始）</p>
-	<p>友情提示：考虑到玩家的牛逼程度，请注意速度变化</p>
-	<p>made by haoqin</p></div>
+	<p>The Snake Game</p>
+	<p>Operate guidebook: the blank space key and the direction key control. Esc for pause</p>
+	<p>Mind the changing speed!</p>
+	<p>Made by Howard</p></div>
 	<div id="right"><p>count:</p></div>
 	<div id="count"></div>
 </body>
@@ -185,19 +185,19 @@
 				count++;
 				switch(count-1){//检测果子数，在界面右侧显示
 					case 3:
-						document.getElementById("count").innerHTML="OK";
+						document.getElementById("count").innerHTML="Not Bad";
 						break;
 					case 6:
-						document.getElementById("count").innerHTML="good";
+						document.getElementById("count").innerHTML="Good";
 						break;
 					case 9:
-						document.getElementById("count").innerHTML="666";
+						document.getElementById("count").innerHTML="Great!";
 						break;
 					case 12:
-						document.getElementById("count").innerHTML="NB!";
+						document.getElementById("count").innerHTML="Fabulous!";
 						break;	
 					case 15:
-						document.getElementById("count").innerHTML="WTF!";
+						document.getElementById("count").innerHTML="Rampage!!";
 						break;
 					default:
 						document.getElementById("count").innerHTML=count-1;
@@ -216,7 +216,7 @@
 					speed=75;
 				}
 				if(count>15){
-					speed=50;
+					speed=30;
 				}
 
 		}
